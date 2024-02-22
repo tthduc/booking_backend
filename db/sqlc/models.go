@@ -36,12 +36,12 @@ type Reservation struct {
 }
 
 type Room struct {
-	ID          int64         `json:"id"`
-	RoomTypeID  int64         `json:"room_type_id"`
-	HotelID     sql.NullInt64 `json:"hotel_id"`
-	IsAvailable int64         `json:"is_available"`
-	Status      int64         `json:"status"`
-	CreatedAt   time.Time     `json:"created_at"`
+	ID          int64     `json:"id"`
+	RoomTypeID  int64     `json:"room_type_id"`
+	HotelID     int64     `json:"hotel_id"`
+	IsAvailable int64     `json:"is_available"`
+	Status      int64     `json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type RoomInventory struct {
@@ -56,7 +56,7 @@ type RoomInventory struct {
 
 type RoomType struct {
 	ID        int64     `json:"id"`
-	Type      string    `json:"type"`
+	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"created_at"`
 }
 

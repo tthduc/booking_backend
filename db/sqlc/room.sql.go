@@ -7,27 +7,33 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createRoom = `-- name: CreateRoom :one
 INSERT INTO room (
                   room_type_id,
                   hotel_id,
-                  is_available)
+                  is_available,
+                  status)
 VALUES (
-        $1, $2, $3
+        $1, $2, $3, $4
         ) RETURNING id, room_type_id, hotel_id, is_available, status, created_at
 `
 
 type CreateRoomParams struct {
-	RoomTypeID  int64         `json:"room_type_id"`
-	HotelID     sql.NullInt64 `json:"hotel_id"`
-	IsAvailable int64         `json:"is_available"`
+	RoomTypeID  int64 `json:"room_type_id"`
+	HotelID     int64 `json:"hotel_id"`
+	IsAvailable int64 `json:"is_available"`
+	Status      int64 `json:"status"`
 }
 
 func (q *Queries) CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, error) {
-	row := q.db.QueryRowContext(ctx, createRoom, arg.RoomTypeID, arg.HotelID, arg.IsAvailable)
+	row := q.db.QueryRowContext(ctx, createRoom,
+		arg.RoomTypeID,
+		arg.HotelID,
+		arg.IsAvailable,
+		arg.Status,
+	)
 	var i Room
 	err := row.Scan(
 		&i.ID,
@@ -38,6 +44,16 @@ func (q *Queries) CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, e
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const deleteRoom = `-- name: DeleteRoom :exec
+DELETE FROM room
+WHERE id = $1
+`
+
+func (q *Queries) DeleteRoom(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteRoom, id)
+	return err
 }
 
 const disableRoom = `-- name: DisableRoom :exec
@@ -57,13 +73,13 @@ func (q *Queries) DisableRoom(ctx context.Context, arg DisableRoomParams) error 
 	return err
 }
 
-const getRoomByHotelId = `-- name: GetRoomByHotelId :one
+const getRoom = `-- name: GetRoom :one
 SELECT id, room_type_id, hotel_id, is_available, status, created_at FROM room
-WHERE $1
+WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetRoomByHotelId(ctx context.Context, dollar_1 interface{}) (Room, error) {
-	row := q.db.QueryRowContext(ctx, getRoomByHotelId, dollar_1)
+func (q *Queries) GetRoom(ctx context.Context, id int64) (Room, error) {
+	row := q.db.QueryRowContext(ctx, getRoom, id)
 	var i Room
 	err := row.Scan(
 		&i.ID,
@@ -76,7 +92,68 @@ func (q *Queries) GetRoomByHotelId(ctx context.Context, dollar_1 interface{}) (R
 	return i, err
 }
 
-const updateRoom = `-- name: UpdateRoom :exec
+const getRoomByHotelId = `-- name: GetRoomByHotelId :one
+SELECT id, room_type_id, hotel_id, is_available, status, created_at FROM room
+WHERE hotel_id = $1
+`
+
+func (q *Queries) GetRoomByHotelId(ctx context.Context, hotelID int64) (Room, error) {
+	row := q.db.QueryRowContext(ctx, getRoomByHotelId, hotelID)
+	var i Room
+	err := row.Scan(
+		&i.ID,
+		&i.RoomTypeID,
+		&i.HotelID,
+		&i.IsAvailable,
+		&i.Status,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const listRooms = `-- name: ListRooms :many
+SELECT id, room_type_id, hotel_id, is_available, status, created_at FROM room
+ORDER BY id
+    LIMIT $1
+OFFSET $2
+`
+
+type ListRoomsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListRooms(ctx context.Context, arg ListRoomsParams) ([]Room, error) {
+	rows, err := q.db.QueryContext(ctx, listRooms, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Room
+	for rows.Next() {
+		var i Room
+		if err := rows.Scan(
+			&i.ID,
+			&i.RoomTypeID,
+			&i.HotelID,
+			&i.IsAvailable,
+			&i.Status,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateRoom = `-- name: UpdateRoom :one
 UPDATE room
 SET room_type_id = $3
 WHERE id = $1 AND hotel_id = $2
@@ -84,12 +161,21 @@ RETURNING id, room_type_id, hotel_id, is_available, status, created_at
 `
 
 type UpdateRoomParams struct {
-	ID         int64         `json:"id"`
-	HotelID    sql.NullInt64 `json:"hotel_id"`
-	RoomTypeID int64         `json:"room_type_id"`
+	ID         int64 `json:"id"`
+	HotelID    int64 `json:"hotel_id"`
+	RoomTypeID int64 `json:"room_type_id"`
 }
 
-func (q *Queries) UpdateRoom(ctx context.Context, arg UpdateRoomParams) error {
-	_, err := q.db.ExecContext(ctx, updateRoom, arg.ID, arg.HotelID, arg.RoomTypeID)
-	return err
+func (q *Queries) UpdateRoom(ctx context.Context, arg UpdateRoomParams) (Room, error) {
+	row := q.db.QueryRowContext(ctx, updateRoom, arg.ID, arg.HotelID, arg.RoomTypeID)
+	var i Room
+	err := row.Scan(
+		&i.ID,
+		&i.RoomTypeID,
+		&i.HotelID,
+		&i.IsAvailable,
+		&i.Status,
+		&i.CreatedAt,
+	)
+	return i, err
 }

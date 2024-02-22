@@ -9,14 +9,14 @@ CREATE TABLE "hotel" (
 CREATE TABLE "room" (
                         "id" bigserial PRIMARY KEY,
                         "room_type_id" bigserial NOT NULL,
-                        "hotel_id" bigserial,
+                        "hotel_id" bigserial NOT NULL,
                         "is_available" bigint NOT NULL,
-                        status bigint NOT NULL,
+                        "status" bigint NOT NULL,
                         "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "room_inventory" (
-                                  "hotel_id" bigserial NOT NULL,
+                                  "hotel_id" bigint NOT NULL,
                                   "room_id" bigserial NOT NULL,
                                   "room_type_id" bigserial NOT NULL,
                                   "date" timestamptz NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE "room_inventory" (
 );
 
 CREATE TABLE "rate" (
-                        "hotel_id" bigserial,
+                        "hotel_id" bigint,
                         "room_id" bigserial NOT NULL,
                         "rate" int NOT NULL,
                         "created_at" timestamptz NOT NULL DEFAULT (now())
@@ -34,7 +34,7 @@ CREATE TABLE "rate" (
 
 CREATE TABLE "reservation" (
                                "id" bigserial PRIMARY KEY,
-                               "hotel_id" bigserial,
+                               "hotel_id" bigint,
                                "room_id" bigserial NOT NULL,
                                "start_date" timestamptz NOT NULL,
                                "end_date" timestamptz NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE "users" (
 
 CREATE TABLE "room_type" (
                              "id" bigserial PRIMARY KEY,
-                             "type" varchar NOT NULL,
+                             "name" varchar NOT NULL,
                              "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
