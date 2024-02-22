@@ -11,6 +11,7 @@ CREATE TABLE "room" (
                         "room_type_id" bigserial NOT NULL,
                         "hotel_id" bigserial,
                         "is_available" bigint NOT NULL,
+                        status bigint NOT NULL,
                         "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 

@@ -12,8 +12,7 @@ import (
 const createHotel = `-- name: CreateHotel :one
 INSERT INTO hotel (name,
                    address,
-                   location)
-VALUES (
+                   location) VALUES (
    $1, $2, $3
 ) RETURNING id, name, address, location, created_at
 `
@@ -68,7 +67,7 @@ func (q *Queries) GetHotel(ctx context.Context, id int64) (Hotel, error) {
 const listHotels = `-- name: ListHotels :many
 SELECT id, name, address, location, created_at FROM hotel
 ORDER BY id
-LIMIT $1
+    LIMIT $1
 OFFSET $2
 `
 
@@ -106,7 +105,7 @@ func (q *Queries) ListHotels(ctx context.Context, arg ListHotelsParams) ([]Hotel
 	return items, nil
 }
 
-const updateHotel = `-- name: UpdateHotel :exec
+const updateHotel = `-- name: UpdateHotel :one
 UPDATE hotel
 SET name = $2, address = $3, location = $4
 WHERE id = $1
@@ -120,12 +119,20 @@ type UpdateHotelParams struct {
 	Location string `json:"location"`
 }
 
-func (q *Queries) UpdateHotel(ctx context.Context, arg UpdateHotelParams) error {
-	_, err := q.db.ExecContext(ctx, updateHotel,
+func (q *Queries) UpdateHotel(ctx context.Context, arg UpdateHotelParams) (Hotel, error) {
+	row := q.db.QueryRowContext(ctx, updateHotel,
 		arg.ID,
 		arg.Name,
 		arg.Address,
 		arg.Location,
 	)
-	return err
+	var i Hotel
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Address,
+		&i.Location,
+		&i.CreatedAt,
+	)
+	return i, err
 }

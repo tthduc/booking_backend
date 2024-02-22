@@ -40,6 +40,7 @@ type Room struct {
 	RoomTypeID  int64         `json:"room_type_id"`
 	HotelID     sql.NullInt64 `json:"hotel_id"`
 	IsAvailable int64         `json:"is_available"`
+	Status      int64         `json:"status"`
 	CreatedAt   time.Time     `json:"created_at"`
 }
 
