@@ -86,6 +86,10 @@ func (store *Store) ReserveTx(ctx context.Context, arg ReserveTxParams) (Reserve
 		if err != nil {
 			return err
 		}
+
+		if roomInventory.TotalInventory <= 0 {
+			return fmt.Errorf("%s", RoomInventoryError)
+		}
 		fmt.Println(txName, "Get roomInventory: ", roomInventory)
 
 		_, err = q.UpdateRoomInventory(ctx, UpdateRoomInventoryParams{

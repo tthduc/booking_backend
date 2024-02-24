@@ -28,7 +28,7 @@ func TestReserveTx(t *testing.T) {
 	roomInventory := createRandomRoomInventory(t, hotel, roomType)
 	require.NotEmpty(t, roomInventory)
 
-	n := 1
+	n := 3
 	amount := int64(100)
 
 	// run n concurrent reservation transaction
@@ -60,7 +60,11 @@ func TestReserveTx(t *testing.T) {
 	// check results
 	for i := 0; i < n; i++ {
 		err := <-errs
-		require.NoError(t, err)
+		if err != nil && err.Error() == db.RoomInventoryError {
+			require.Equal(t, err.Error(), db.RoomInventoryError)
+		} else {
+			require.NoError(t, err)
+		}
 
 		result := <-results
 		require.NotEmpty(t, result)
@@ -74,11 +78,4 @@ func TestReserveTx(t *testing.T) {
 		require.NotZero(t, reservation.ID)
 		require.NotZero(t, reservation.CreatedAt)
 	}
-
-	//updatedAccount2, err := testStore.GetAccount(context.Background(), account2.ID)
-	//require.NoError(t, err)
-	//
-	//fmt.Println(">> after:", updatedAccount1.Balance, updatedAccount2.Balance)
-	//require.Equal(t, account1.Balance-int64(n)*amount, updatedAccount1.Balance)
-	//require.Equal(t, account2.Balance+int64(n)*amount, updatedAccount2.Balance)
 }

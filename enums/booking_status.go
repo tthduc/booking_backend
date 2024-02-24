@@ -1,5 +1,7 @@
 package enums
 
-const Waiting = 0
-const Cancel = 1
-const Approve = 2
+const (
+	Waiting = 0
+	Cancel  = 1
+	Approve = 2
+)
