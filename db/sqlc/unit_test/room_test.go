@@ -10,12 +10,9 @@ import (
 	"time"
 )
 
-func createRandomRoom(t *testing.T) db.Room {
+func createRandomRoom(t *testing.T, roomType db.RoomType) db.Room {
 	hotel := createRandomHotel(t)
 	require.NotEmpty(t, hotel)
-
-	roomType := createRandomRoomType(t)
-	require.NotEmpty(t, roomType)
 
 	arg := db.CreateRoomParams{
 		RoomTypeID:  roomType.ID,
@@ -41,11 +38,17 @@ func createRandomRoom(t *testing.T) db.Room {
 }
 
 func TestCreateRoom(t *testing.T) {
-	createRandomRoom(t)
+	roomType := createRandomRoomType(t)
+	require.NotEmpty(t, roomType)
+
+	createRandomRoom(t, roomType)
 }
 
 func TestGetRoom(t *testing.T) {
-	room1 := createRandomRoom(t)
+	roomType := createRandomRoomType(t)
+	require.NotEmpty(t, roomType)
+
+	room1 := createRandomRoom(t, roomType)
 	room2, err := testQueries.GetRoom(context.Background(), room1.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, room2)
@@ -58,7 +61,10 @@ func TestGetRoom(t *testing.T) {
 }
 
 func TestGetRoomByHotelId(t *testing.T) {
-	room1 := createRandomRoom(t)
+	roomType := createRandomRoomType(t)
+	require.NotEmpty(t, roomType)
+
+	room1 := createRandomRoom(t, roomType)
 	room2, err := testQueries.GetRoomByHotelId(context.Background(), room1.HotelID)
 
 	require.NoError(t, err)
@@ -72,15 +78,15 @@ func TestGetRoomByHotelId(t *testing.T) {
 }
 
 func TestUpdateRoom(t *testing.T) {
-	room1 := createRandomRoom(t)
+	roomType := createRandomRoomType(t)
+	require.NotEmpty(t, roomType)
+
+	room1 := createRandomRoom(t, roomType)
 	require.NotEmpty(t, room1)
 
 	hotel, err := testQueries.GetHotel(context.Background(), room1.HotelID)
 	require.NoError(t, err)
 	require.NotEmpty(t, hotel)
-
-	roomType := createRandomRoomType(t)
-	require.NotEmpty(t, roomType)
 
 	arg := db.UpdateRoomParams{
 		ID:         room1.ID,
@@ -100,7 +106,10 @@ func TestUpdateRoom(t *testing.T) {
 }
 
 func TestDeleteRoom(t *testing.T) {
-	room1 := createRandomRoom(t)
+	roomType := createRandomRoomType(t)
+	require.NotEmpty(t, roomType)
+
+	room1 := createRandomRoom(t, roomType)
 	err := testQueries.DeleteRoom(context.Background(), room1.ID)
 	require.NoError(t, err)
 
@@ -111,8 +120,11 @@ func TestDeleteRoom(t *testing.T) {
 }
 
 func TestListRoom(t *testing.T) {
+	roomType := createRandomRoomType(t)
+	require.NotEmpty(t, roomType)
+
 	for i := 0; i < 10; i++ {
-		createRandomRoom(t)
+		createRandomRoom(t, roomType)
 	}
 
 	arg := db.ListRoomsParams{

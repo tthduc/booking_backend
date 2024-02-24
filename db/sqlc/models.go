@@ -25,14 +25,15 @@ type Rate struct {
 }
 
 type Reservation struct {
-	ID        int64         `json:"id"`
-	HotelID   sql.NullInt64 `json:"hotel_id"`
-	RoomID    int64         `json:"room_id"`
-	StartDate time.Time     `json:"start_date"`
-	EndDate   time.Time     `json:"end_date"`
-	Status    int32         `json:"status"`
-	UserID    sql.NullInt64 `json:"user_id"`
-	CreatedAt time.Time     `json:"created_at"`
+	ID        int64     `json:"id"`
+	HotelID   int64     `json:"hotel_id"`
+	RoomID    int64     `json:"room_id"`
+	StartDate time.Time `json:"start_date"`
+	EndDate   time.Time `json:"end_date"`
+	Status    int32     `json:"status"`
+	Amount    int64     `json:"amount"`
+	UserID    int64     `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Room struct {
@@ -47,7 +48,6 @@ type Room struct {
 
 type RoomInventory struct {
 	HotelID        int64     `json:"hotel_id"`
-	RoomID         int64     `json:"room_id"`
 	RoomTypeID     int64     `json:"room_type_id"`
 	Date           time.Time `json:"date"`
 	TotalInventory int32     `json:"total_inventory"`
@@ -64,6 +64,7 @@ type RoomType struct {
 type User struct {
 	ID                int64     `json:"id"`
 	Username          string    `json:"username"`
+	Email             string    `json:"email"`
 	HashedPassword    string    `json:"hashed_password"`
 	FullName          string    `json:"full_name"`
 	PasswordChangedAt time.Time `json:"password_changed_at"`

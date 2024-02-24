@@ -7,24 +7,21 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"time"
 )
 
 const createRoomInventory = `-- name: CreateRoomInventory :one
 INSERT INTO room_inventory (hotel_id,
-                   room_id,
                    room_type_id,
                    date,
                    total_inventory,
                    total_reserved) VALUES (
-    $1, $2, $3, $4, $5, $6
-) RETURNING hotel_id, room_id, room_type_id, date, total_inventory, total_reserved, created_at
+    $1, $2, $3, $4, $5
+) RETURNING hotel_id, room_type_id, date, total_inventory, total_reserved, created_at
 `
 
 type CreateRoomInventoryParams struct {
 	HotelID        int64     `json:"hotel_id"`
-	RoomID         int64     `json:"room_id"`
 	RoomTypeID     int64     `json:"room_type_id"`
 	Date           time.Time `json:"date"`
 	TotalInventory int32     `json:"total_inventory"`
@@ -34,7 +31,6 @@ type CreateRoomInventoryParams struct {
 func (q *Queries) CreateRoomInventory(ctx context.Context, arg CreateRoomInventoryParams) (RoomInventory, error) {
 	row := q.db.QueryRowContext(ctx, createRoomInventory,
 		arg.HotelID,
-		arg.RoomID,
 		arg.RoomTypeID,
 		arg.Date,
 		arg.TotalInventory,
@@ -43,7 +39,30 @@ func (q *Queries) CreateRoomInventory(ctx context.Context, arg CreateRoomInvento
 	var i RoomInventory
 	err := row.Scan(
 		&i.HotelID,
-		&i.RoomID,
+		&i.RoomTypeID,
+		&i.Date,
+		&i.TotalInventory,
+		&i.TotalReserved,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getRoomInventory = `-- name: GetRoomInventory :one
+SELECT hotel_id, room_type_id, date, total_inventory, total_reserved, created_at FROM room_inventory
+WHERE hotel_id = $1 AND room_type_id = $2
+`
+
+type GetRoomInventoryParams struct {
+	HotelID    int64 `json:"hotel_id"`
+	RoomTypeID int64 `json:"room_type_id"`
+}
+
+func (q *Queries) GetRoomInventory(ctx context.Context, arg GetRoomInventoryParams) (RoomInventory, error) {
+	row := q.db.QueryRowContext(ctx, getRoomInventory, arg.HotelID, arg.RoomTypeID)
+	var i RoomInventory
+	err := row.Scan(
+		&i.HotelID,
 		&i.RoomTypeID,
 		&i.Date,
 		&i.TotalInventory,
@@ -54,27 +73,21 @@ func (q *Queries) CreateRoomInventory(ctx context.Context, arg CreateRoomInvento
 }
 
 const listRoomInventory = `-- name: ListRoomInventory :many
-SELECT hotel_id, room_id, room_type_id, date, total_inventory, total_reserved, created_at FROM room_inventory
-WHERE hotel_id = COALESCE($1, hotel_id) AND (room_id = COALESCE($2, room_id))
-ORDER BY $1
-LIMIT $4
-OFFSET $3
+SELECT hotel_id, room_type_id, date, total_inventory, total_reserved, created_at FROM room_inventory
+WHERE hotel_id = $3
+ORDER BY hotel_id
+LIMIT $1
+OFFSET $2
 `
 
 type ListRoomInventoryParams struct {
-	HotelID sql.NullInt64 `json:"hotel_id"`
-	RoomID  sql.NullInt64 `json:"room_id"`
-	Offset1 int32         `json:"offset1"`
-	Page    int32         `json:"page"`
+	Limit   int32 `json:"limit"`
+	Offset  int32 `json:"offset"`
+	HotelID int64 `json:"hotel_id"`
 }
 
 func (q *Queries) ListRoomInventory(ctx context.Context, arg ListRoomInventoryParams) ([]RoomInventory, error) {
-	rows, err := q.db.QueryContext(ctx, listRoomInventory,
-		arg.HotelID,
-		arg.RoomID,
-		arg.Offset1,
-		arg.Page,
-	)
+	rows, err := q.db.QueryContext(ctx, listRoomInventory, arg.Limit, arg.Offset, arg.HotelID)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +97,6 @@ func (q *Queries) ListRoomInventory(ctx context.Context, arg ListRoomInventoryPa
 		var i RoomInventory
 		if err := rows.Scan(
 			&i.HotelID,
-			&i.RoomID,
 			&i.RoomTypeID,
 			&i.Date,
 			&i.TotalInventory,
@@ -108,32 +120,23 @@ const updateRoomInventory = `-- name: UpdateRoomInventory :one
 UPDATE room_inventory
 SET
     date = $3,
-    total_inventory = $4,
-    total_reserved = $5
-WHERE hotel_id = $1 and room_id = $2
-RETURNING hotel_id, room_id, room_type_id, date, total_inventory, total_reserved, created_at
+    total_inventory = total_inventory - 1,
+    total_reserved = total_reserved + 1
+WHERE hotel_id = $1 and room_type_id = $2
+RETURNING hotel_id, room_type_id, date, total_inventory, total_reserved, created_at
 `
 
 type UpdateRoomInventoryParams struct {
-	HotelID        int64     `json:"hotel_id"`
-	RoomID         int64     `json:"room_id"`
-	Date           time.Time `json:"date"`
-	TotalInventory int32     `json:"total_inventory"`
-	TotalReserved  int32     `json:"total_reserved"`
+	HotelID    int64     `json:"hotel_id"`
+	RoomTypeID int64     `json:"room_type_id"`
+	Date       time.Time `json:"date"`
 }
 
 func (q *Queries) UpdateRoomInventory(ctx context.Context, arg UpdateRoomInventoryParams) (RoomInventory, error) {
-	row := q.db.QueryRowContext(ctx, updateRoomInventory,
-		arg.HotelID,
-		arg.RoomID,
-		arg.Date,
-		arg.TotalInventory,
-		arg.TotalReserved,
-	)
+	row := q.db.QueryRowContext(ctx, updateRoomInventory, arg.HotelID, arg.RoomTypeID, arg.Date)
 	var i RoomInventory
 	err := row.Scan(
 		&i.HotelID,
-		&i.RoomID,
 		&i.RoomTypeID,
 		&i.Date,
 		&i.TotalInventory,

@@ -7,14 +7,10 @@ import (
 	"testing"
 )
 
-func createRandomRoomInventory(t *testing.T, hotel db.Hotel) db.RoomInventory {
-	room := createRandomRoom(t)
-	require.NotEmpty(t, room)
-
+func createRandomRoomInventory(t *testing.T, hotel db.Hotel, roomType db.RoomType) db.RoomInventory {
 	arg := db.CreateRoomInventoryParams{
 		HotelID:        hotel.ID,
-		RoomID:         room.ID,
-		RoomTypeID:     room.RoomTypeID,
+		RoomTypeID:     roomType.ID,
 		TotalInventory: 100,
 		TotalReserved:  0,
 	}
@@ -23,7 +19,6 @@ func createRandomRoomInventory(t *testing.T, hotel db.Hotel) db.RoomInventory {
 	require.NoError(t, err)
 	require.NotEmpty(t, roomInventory)
 	require.Equal(t, arg.HotelID, roomInventory.HotelID)
-	require.Equal(t, arg.RoomID, roomInventory.RoomID)
 	require.Equal(t, arg.RoomTypeID, roomInventory.RoomTypeID)
 	require.Equal(t, arg.TotalInventory, roomInventory.TotalInventory)
 	require.Equal(t, arg.TotalReserved, roomInventory.TotalReserved)
@@ -37,28 +32,28 @@ func createRandomRoomInventory(t *testing.T, hotel db.Hotel) db.RoomInventory {
 func TestCreateRoomInventory(t *testing.T) {
 	hotel := createRandomHotel(t)
 	require.NotEmpty(t, hotel)
-	createRandomRoomInventory(t, hotel)
+
+	roomType := createRandomRoomType(t)
+	require.NotEmpty(t, hotel)
+
+	createRandomRoomInventory(t, hotel, roomType)
 }
 
 func TestListRoomInventory(t *testing.T) {
 	hotel := createRandomHotel(t)
 	require.NotEmpty(t, hotel)
 
+	roomType := createRandomRoomType(t)
+	require.NotEmpty(t, hotel)
+
 	for i := 0; i < 10; i++ {
-		createRandomRoomInventory(t, hotel)
+		createRandomRoomInventory(t, hotel, roomType)
 	}
 
 	arg := db.ListRoomInventoryParams{
-		Page:    5,
-		Offset1: 5,
-		//HotelID: sql.NullInt64{
-		//	Int64: 34,
-		//	Valid: true,
-		//},
-		//RoomID: sql.NullInt64{
-		//	Int64: 26,
-		//	Valid: true,
-		//},
+		Limit:   5,
+		Offset:  5,
+		HotelID: hotel.ID,
 	}
 
 	roomInventories, err := testQueries.ListRoomInventory(context.Background(), arg)

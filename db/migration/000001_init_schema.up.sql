@@ -18,7 +18,6 @@ CREATE TABLE "room" (
 
 CREATE TABLE "room_inventory" (
                                   "hotel_id" bigint NOT NULL,
-                                  "room_id" bigserial NOT NULL,
                                   "room_type_id" bigserial NOT NULL,
                                   "date" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z',
                                   "total_inventory" int NOT NULL,
@@ -35,18 +34,20 @@ CREATE TABLE "rate" (
 
 CREATE TABLE "reservation" (
                                "id" bigserial PRIMARY KEY,
-                               "hotel_id" bigint,
+                               "hotel_id" bigserial NOT NULL,
                                "room_id" bigserial NOT NULL,
                                "start_date" timestamptz NOT NULL,
                                "end_date" timestamptz NOT NULL,
                                "status" int NOT NULL,
-                               "user_id" bigserial,
+                               "amount" bigserial NOT NULL,
+                               "user_id" bigserial NOT NULL,
                                "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "users" (
                          "id" bigserial PRIMARY KEY,
                          "username" varchar NOT NULL,
+                         "email" varchar NOT NULL,
                          "hashed_password" varchar NOT NULL,
                          "full_name" varchar NOT NULL,
                          "password_changed_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z',
@@ -61,17 +62,15 @@ CREATE TABLE "room_type" (
 
 CREATE INDEX ON "room_inventory" ("hotel_id", "room_type_id");
 
-CREATE UNIQUE INDEX ON "room_inventory" ("hotel_id", "room_id");
-
 CREATE UNIQUE INDEX ON "rate" ("hotel_id", "room_id");
+
+CREATE UNIQUE INDEX ON "users" ("email");
 
 ALTER TABLE "room" ADD FOREIGN KEY ("room_type_id") REFERENCES "room_type" ("id");
 
 ALTER TABLE "room" ADD FOREIGN KEY ("hotel_id") REFERENCES "hotel" ("id");
 
 ALTER TABLE "room_inventory" ADD FOREIGN KEY ("hotel_id") REFERENCES "hotel" ("id");
-
-ALTER TABLE "room_inventory" ADD FOREIGN KEY ("room_id") REFERENCES "room" ("id");
 
 ALTER TABLE "rate" ADD FOREIGN KEY ("hotel_id") REFERENCES "hotel" ("id");
 
