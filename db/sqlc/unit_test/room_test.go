@@ -2,6 +2,7 @@ package unit_test
 
 import (
 	db "booking-backed/db/sqlc"
+	"booking-backed/util"
 	"context"
 	"database/sql"
 	"github.com/stretchr/testify/require"
@@ -19,6 +20,7 @@ func createRandomRoom(t *testing.T) db.Room {
 	arg := db.CreateRoomParams{
 		RoomTypeID:  roomType.ID,
 		HotelID:     hotel.ID,
+		Name:        util.RandomString(10),
 		IsAvailable: 1,
 		Status:      1,
 	}
@@ -26,6 +28,7 @@ func createRandomRoom(t *testing.T) db.Room {
 	room, err := testQueries.CreateRoom(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, room)
+	require.Equal(t, arg.Name, room.Name)
 	require.Equal(t, arg.RoomTypeID, room.RoomTypeID)
 	require.Equal(t, arg.HotelID, room.HotelID)
 	require.Equal(t, arg.IsAvailable, room.IsAvailable)
@@ -83,6 +86,7 @@ func TestUpdateRoom(t *testing.T) {
 		ID:         room1.ID,
 		HotelID:    hotel.ID,
 		RoomTypeID: roomType.ID,
+		Name:       util.RandomString(10),
 	}
 
 	room2, err := testQueries.UpdateRoom(context.Background(), arg)

@@ -37,6 +37,7 @@ type Reservation struct {
 
 type Room struct {
 	ID          int64     `json:"id"`
+	Name        string    `json:"name"`
 	RoomTypeID  int64     `json:"room_type_id"`
 	HotelID     int64     `json:"hotel_id"`
 	IsAvailable int64     `json:"is_available"`

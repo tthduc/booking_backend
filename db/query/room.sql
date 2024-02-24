@@ -1,16 +1,17 @@
 -- name: CreateRoom :one
 INSERT INTO room (
+                  name,
                   room_type_id,
                   hotel_id,
                   is_available,
                   status)
 VALUES (
-        $1, $2, $3, $4
+        $1, $2, $3, $4, $5
         ) RETURNING *;
 
 -- name: UpdateRoom :one
 UPDATE room
-SET room_type_id = $3
+SET room_type_id = $3, name = $4
 WHERE id = $1 AND hotel_id = $2
 RETURNING *;
 

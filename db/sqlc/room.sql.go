@@ -11,24 +11,27 @@ import (
 
 const createRoom = `-- name: CreateRoom :one
 INSERT INTO room (
+                  name,
                   room_type_id,
                   hotel_id,
                   is_available,
                   status)
 VALUES (
-        $1, $2, $3, $4
-        ) RETURNING id, room_type_id, hotel_id, is_available, status, created_at
+        $1, $2, $3, $4, $5
+        ) RETURNING id, name, room_type_id, hotel_id, is_available, status, created_at
 `
 
 type CreateRoomParams struct {
-	RoomTypeID  int64 `json:"room_type_id"`
-	HotelID     int64 `json:"hotel_id"`
-	IsAvailable int64 `json:"is_available"`
-	Status      int64 `json:"status"`
+	Name        string `json:"name"`
+	RoomTypeID  int64  `json:"room_type_id"`
+	HotelID     int64  `json:"hotel_id"`
+	IsAvailable int64  `json:"is_available"`
+	Status      int64  `json:"status"`
 }
 
 func (q *Queries) CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, error) {
 	row := q.db.QueryRowContext(ctx, createRoom,
+		arg.Name,
 		arg.RoomTypeID,
 		arg.HotelID,
 		arg.IsAvailable,
@@ -37,6 +40,7 @@ func (q *Queries) CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, e
 	var i Room
 	err := row.Scan(
 		&i.ID,
+		&i.Name,
 		&i.RoomTypeID,
 		&i.HotelID,
 		&i.IsAvailable,
@@ -60,7 +64,7 @@ const disableRoom = `-- name: DisableRoom :exec
 UPDATE room
 SET status = $2
 WHERE id = $1
-    RETURNING id, room_type_id, hotel_id, is_available, status, created_at
+    RETURNING id, name, room_type_id, hotel_id, is_available, status, created_at
 `
 
 type DisableRoomParams struct {
@@ -74,7 +78,7 @@ func (q *Queries) DisableRoom(ctx context.Context, arg DisableRoomParams) error 
 }
 
 const getRoom = `-- name: GetRoom :one
-SELECT id, room_type_id, hotel_id, is_available, status, created_at FROM room
+SELECT id, name, room_type_id, hotel_id, is_available, status, created_at FROM room
 WHERE id = $1 LIMIT 1
 `
 
@@ -83,6 +87,7 @@ func (q *Queries) GetRoom(ctx context.Context, id int64) (Room, error) {
 	var i Room
 	err := row.Scan(
 		&i.ID,
+		&i.Name,
 		&i.RoomTypeID,
 		&i.HotelID,
 		&i.IsAvailable,
@@ -93,7 +98,7 @@ func (q *Queries) GetRoom(ctx context.Context, id int64) (Room, error) {
 }
 
 const getRoomByHotelId = `-- name: GetRoomByHotelId :one
-SELECT id, room_type_id, hotel_id, is_available, status, created_at FROM room
+SELECT id, name, room_type_id, hotel_id, is_available, status, created_at FROM room
 WHERE hotel_id = $1
 `
 
@@ -102,6 +107,7 @@ func (q *Queries) GetRoomByHotelId(ctx context.Context, hotelID int64) (Room, er
 	var i Room
 	err := row.Scan(
 		&i.ID,
+		&i.Name,
 		&i.RoomTypeID,
 		&i.HotelID,
 		&i.IsAvailable,
@@ -112,7 +118,7 @@ func (q *Queries) GetRoomByHotelId(ctx context.Context, hotelID int64) (Room, er
 }
 
 const listRooms = `-- name: ListRooms :many
-SELECT id, room_type_id, hotel_id, is_available, status, created_at FROM room
+SELECT id, name, room_type_id, hotel_id, is_available, status, created_at FROM room
 ORDER BY id
     LIMIT $1
 OFFSET $2
@@ -134,6 +140,7 @@ func (q *Queries) ListRooms(ctx context.Context, arg ListRoomsParams) ([]Room, e
 		var i Room
 		if err := rows.Scan(
 			&i.ID,
+			&i.Name,
 			&i.RoomTypeID,
 			&i.HotelID,
 			&i.IsAvailable,
@@ -155,22 +162,29 @@ func (q *Queries) ListRooms(ctx context.Context, arg ListRoomsParams) ([]Room, e
 
 const updateRoom = `-- name: UpdateRoom :one
 UPDATE room
-SET room_type_id = $3
+SET room_type_id = $3, name = $4
 WHERE id = $1 AND hotel_id = $2
-RETURNING id, room_type_id, hotel_id, is_available, status, created_at
+RETURNING id, name, room_type_id, hotel_id, is_available, status, created_at
 `
 
 type UpdateRoomParams struct {
-	ID         int64 `json:"id"`
-	HotelID    int64 `json:"hotel_id"`
-	RoomTypeID int64 `json:"room_type_id"`
+	ID         int64  `json:"id"`
+	HotelID    int64  `json:"hotel_id"`
+	RoomTypeID int64  `json:"room_type_id"`
+	Name       string `json:"name"`
 }
 
 func (q *Queries) UpdateRoom(ctx context.Context, arg UpdateRoomParams) (Room, error) {
-	row := q.db.QueryRowContext(ctx, updateRoom, arg.ID, arg.HotelID, arg.RoomTypeID)
+	row := q.db.QueryRowContext(ctx, updateRoom,
+		arg.ID,
+		arg.HotelID,
+		arg.RoomTypeID,
+		arg.Name,
+	)
 	var i Room
 	err := row.Scan(
 		&i.ID,
+		&i.Name,
 		&i.RoomTypeID,
 		&i.HotelID,
 		&i.IsAvailable,

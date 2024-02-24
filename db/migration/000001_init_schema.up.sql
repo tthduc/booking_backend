@@ -8,6 +8,7 @@ CREATE TABLE "hotel" (
 
 CREATE TABLE "room" (
                         "id" bigserial PRIMARY KEY,
+                        "name" varchar NOT NULL,
                         "room_type_id" bigserial NOT NULL,
                         "hotel_id" bigserial NOT NULL,
                         "is_available" bigint NOT NULL,
@@ -19,7 +20,7 @@ CREATE TABLE "room_inventory" (
                                   "hotel_id" bigint NOT NULL,
                                   "room_id" bigserial NOT NULL,
                                   "room_type_id" bigserial NOT NULL,
-                                  "date" timestamptz NOT NULL,
+                                  "date" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z',
                                   "total_inventory" int NOT NULL,
                                   "total_reserved" int NOT NULL,
                                   "created_at" timestamptz NOT NULL DEFAULT (now())

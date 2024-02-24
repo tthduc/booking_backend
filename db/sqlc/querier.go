@@ -11,6 +11,7 @@ import (
 type Querier interface {
 	CreateHotel(ctx context.Context, arg CreateHotelParams) (Hotel, error)
 	CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, error)
+	CreateRoomInventory(ctx context.Context, arg CreateRoomInventoryParams) (RoomInventory, error)
 	CreateRoomType(ctx context.Context, name string) (RoomType, error)
 	DeleteHotel(ctx context.Context, id int64) error
 	DeleteRoom(ctx context.Context, id int64) error
@@ -21,10 +22,12 @@ type Querier interface {
 	GetRoomByHotelId(ctx context.Context, hotelID int64) (Room, error)
 	GetRoomType(ctx context.Context, id int64) (RoomType, error)
 	ListHotels(ctx context.Context, arg ListHotelsParams) ([]Hotel, error)
+	ListRoomInventory(ctx context.Context, arg ListRoomInventoryParams) ([]RoomInventory, error)
 	ListRoomType(ctx context.Context, arg ListRoomTypeParams) ([]RoomType, error)
 	ListRooms(ctx context.Context, arg ListRoomsParams) ([]Room, error)
 	UpdateHotel(ctx context.Context, arg UpdateHotelParams) (Hotel, error)
 	UpdateRoom(ctx context.Context, arg UpdateRoomParams) (Room, error)
+	UpdateRoomInventory(ctx context.Context, arg UpdateRoomInventoryParams) (RoomInventory, error)
 	UpdateRoomType(ctx context.Context, arg UpdateRoomTypeParams) (RoomType, error)
 }
 
