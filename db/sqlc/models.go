@@ -5,7 +5,6 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -18,10 +17,11 @@ type Hotel struct {
 }
 
 type Rate struct {
-	HotelID   sql.NullInt64 `json:"hotel_id"`
-	RoomID    int64         `json:"room_id"`
-	Rate      int32         `json:"rate"`
-	CreatedAt time.Time     `json:"created_at"`
+	HotelID   int64     `json:"hotel_id"`
+	RoomID    int64     `json:"room_id"`
+	UserID    int64     `json:"user_id"`
+	Rate      int64     `json:"rate"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Reservation struct {

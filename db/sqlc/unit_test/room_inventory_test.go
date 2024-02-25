@@ -11,7 +11,7 @@ func createRandomRoomInventory(t *testing.T, hotel db.Hotel, roomType db.RoomTyp
 	arg := db.CreateRoomInventoryParams{
 		HotelID:        hotel.ID,
 		RoomTypeID:     roomType.ID,
-		TotalInventory: 1,
+		TotalInventory: 100,
 		TotalReserved:  0,
 	}
 

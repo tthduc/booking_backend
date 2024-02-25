@@ -10,6 +10,7 @@ import (
 
 type Querier interface {
 	CreateHotel(ctx context.Context, arg CreateHotelParams) (Hotel, error)
+	CreateRate(ctx context.Context, arg CreateRateParams) (Rate, error)
 	CreateReservation(ctx context.Context, arg CreateReservationParams) (Reservation, error)
 	CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, error)
 	CreateRoomInventory(ctx context.Context, arg CreateRoomInventoryParams) (RoomInventory, error)

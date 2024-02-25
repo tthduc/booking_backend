@@ -16,11 +16,11 @@ func TestReserveTx(t *testing.T) {
 	roomType := createRandomRoomType(t)
 	require.NotEmpty(t, roomType)
 
-	room := createRandomRoom(t, roomType)
-	require.NotEmpty(t, room)
-
 	hotel := createRandomHotel(t)
 	require.NotEmpty(t, hotel)
+
+	room := createRandomRoom(t, hotel, roomType)
+	require.NotEmpty(t, room)
 
 	user := createRandomUser(t)
 	require.NotEmpty(t, user)

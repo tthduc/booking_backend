@@ -26,9 +26,10 @@ CREATE TABLE "room_inventory" (
 );
 
 CREATE TABLE "rate" (
-                        "hotel_id" bigint,
+                        "hotel_id" bigserial NOT NULL,
                         "room_id" bigserial NOT NULL,
-                        "rate" int NOT NULL,
+                        "user_id" bigserial NOT NULL,
+                        "rate" bigserial NOT NULL,
                         "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
@@ -62,7 +63,7 @@ CREATE TABLE "room_type" (
 
 CREATE INDEX ON "room_inventory" ("hotel_id", "room_type_id");
 
-CREATE UNIQUE INDEX ON "rate" ("hotel_id", "room_id");
+CREATE UNIQUE INDEX ON "rate" ("hotel_id", "room_id", "user_id");
 
 CREATE UNIQUE INDEX ON "users" ("email");
 
@@ -75,6 +76,8 @@ ALTER TABLE "room_inventory" ADD FOREIGN KEY ("hotel_id") REFERENCES "hotel" ("i
 ALTER TABLE "rate" ADD FOREIGN KEY ("hotel_id") REFERENCES "hotel" ("id");
 
 ALTER TABLE "rate" ADD FOREIGN KEY ("room_id") REFERENCES "room" ("id");
+
+ALTER TABLE "rate" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
 ALTER TABLE "reservation" ADD FOREIGN KEY ("hotel_id") REFERENCES "hotel" ("id");
 
