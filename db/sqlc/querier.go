@@ -34,6 +34,7 @@ type Querier interface {
 	ListRoomType(ctx context.Context, arg ListRoomTypeParams) ([]RoomType, error)
 	ListRooms(ctx context.Context, arg ListRoomsParams) ([]Room, error)
 	UpdateHotel(ctx context.Context, arg UpdateHotelParams) (Hotel, error)
+	UpdateRate(ctx context.Context, arg UpdateRateParams) (Rate, error)
 	UpdateReservation(ctx context.Context, arg UpdateReservationParams) (Reservation, error)
 	UpdateRoom(ctx context.Context, arg UpdateRoomParams) (Room, error)
 	UpdateRoomInventory(ctx context.Context, arg UpdateRoomInventoryParams) (RoomInventory, error)

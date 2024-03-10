@@ -42,3 +42,35 @@ func (q *Queries) CreateRate(ctx context.Context, arg CreateRateParams) (Rate, e
 	)
 	return i, err
 }
+
+const updateRate = `-- name: UpdateRate :one
+UPDATE rate
+SET rate = $4
+WHERE hotel_id = $1 AND room_id = $2 AND user_id = $3
+RETURNING hotel_id, room_id, user_id, rate, created_at
+`
+
+type UpdateRateParams struct {
+	HotelID int64 `json:"hotel_id"`
+	RoomID  int64 `json:"room_id"`
+	UserID  int64 `json:"user_id"`
+	Rate    int64 `json:"rate"`
+}
+
+func (q *Queries) UpdateRate(ctx context.Context, arg UpdateRateParams) (Rate, error) {
+	row := q.db.QueryRowContext(ctx, updateRate,
+		arg.HotelID,
+		arg.RoomID,
+		arg.UserID,
+		arg.Rate,
+	)
+	var i Rate
+	err := row.Scan(
+		&i.HotelID,
+		&i.RoomID,
+		&i.UserID,
+		&i.Rate,
+		&i.CreatedAt,
+	)
+	return i, err
+}
