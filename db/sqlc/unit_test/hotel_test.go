@@ -27,7 +27,7 @@ func createRandomHotel(t *testing.T) db.Hotel {
 	require.NotZero(t, hotel.ID)
 	require.NotZero(t, hotel.CreatedAt)
 
-	return db.Hotel{}
+	return hotel
 }
 
 func TestCreateHotel(t *testing.T) {
