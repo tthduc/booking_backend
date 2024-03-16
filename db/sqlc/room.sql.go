@@ -135,7 +135,7 @@ func (q *Queries) ListRooms(ctx context.Context, arg ListRoomsParams) ([]Room, e
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Room
+	items := []Room{}
 	for rows.Next() {
 		var i Room
 		if err := rows.Scan(

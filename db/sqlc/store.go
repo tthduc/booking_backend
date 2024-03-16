@@ -16,13 +16,18 @@ However, each query only do 1 operation on 1 specific table.
 So Queries struct doesn’t support transaction, that’s why we have to extend its functionality
 by embedding it inside the Store struct like this. By embedding Queries inside Store, all individual query functions provided by Queries will be available to Store.
 */
-type Store struct {
-	*Queries
-	db *sql.DB
+type Store interface {
+	Querier
+	ReserveTx(ctx context.Context, arg ReserveTxParams) (ReserveTxResult, error)
 }
 
-func NewStore(db *sql.DB) *Store {
-	return &Store{
+type SQLStore struct {
+	db *sql.DB
+	*Queries
+}
+
+func NewStore(db *sql.DB) Store {
+	return &SQLStore{
 		db:      db,
 		Queries: New(db),
 	}
@@ -33,7 +38,7 @@ A context and a callback function as input, then it will start a new db transact
 create a new Queries object with that transaction call the callback function with the created Queries,
 and finally commit or rollback the transaction based on the error returned by that function.
 */
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	tx, err := store.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err

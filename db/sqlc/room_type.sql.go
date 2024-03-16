@@ -64,7 +64,7 @@ func (q *Queries) ListRoomType(ctx context.Context, arg ListRoomTypeParams) ([]R
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RoomType
+	items := []RoomType{}
 	for rows.Next() {
 		var i RoomType
 		if err := rows.Scan(&i.ID, &i.Name, &i.CreatedAt); err != nil {

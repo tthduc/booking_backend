@@ -82,7 +82,7 @@ func (q *Queries) ListHotels(ctx context.Context, arg ListHotelsParams) ([]Hotel
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Hotel
+	items := []Hotel{}
 	for rows.Next() {
 		var i Hotel
 		if err := rows.Scan(

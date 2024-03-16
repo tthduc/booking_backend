@@ -109,7 +109,7 @@ func (q *Queries) ListReservations(ctx context.Context, arg ListReservationsPara
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Reservation
+	items := []Reservation{}
 	for rows.Next() {
 		var i Reservation
 		if err := rows.Scan(

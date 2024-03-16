@@ -92,7 +92,7 @@ func (q *Queries) ListRoomInventory(ctx context.Context, arg ListRoomInventoryPa
 		return nil, err
 	}
 	defer rows.Close()
-	var items []RoomInventory
+	items := []RoomInventory{}
 	for rows.Next() {
 		var i RoomInventory
 		if err := rows.Scan(

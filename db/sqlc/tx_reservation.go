@@ -23,7 +23,7 @@ type ReserveTxResult struct {
 
 var TxKey = struct{}{}
 
-func (store *Store) ReserveTx(ctx context.Context, arg ReserveTxParams) (ReserveTxResult, error) {
+func (store *SQLStore) ReserveTx(ctx context.Context, arg ReserveTxParams) (ReserveTxResult, error) {
 	var result ReserveTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
